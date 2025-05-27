@@ -159,7 +159,6 @@ a2a-protocol-demo/
 
 ### Development Dependencies
 - **poethepoet** (>=0.34.0) - Task runner
-- **pyright** (>=1.1.401) - Type checking
 - **ruff** (>=0.11.11) - Fast Python linter and formatter
 
 ## 🔧 Development Commands
@@ -170,9 +169,6 @@ uv run poe format
 
 # Check for code issues
 uv run poe lint
-
-# Type checking
-uv run poe typecheck
 
 # Run all checks
 uv run poe check
