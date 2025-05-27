@@ -1,0 +1,40 @@
+[project]
+name = "a2a-protocol-demo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12.10"
+dependencies = [
+    "fastapi>=0.115.12",
+    "google-adk>=1.0.0",
+    "httpx>=0.28.1",
+    "litellm>=1.71.1",
+    "openai>=1.82.0",
+    "pydantic>=2.11.5",
+    "python-dotenv>=1.1.0",
+    "streamlit>=1.45.1",
+    "uvicorn>=0.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "poethepoet>=0.34.0",
+    "pyright>=1.1.401",
+    "ruff>=0.11.11",
+]
+
+[tool.ruff]
+line-length = 88
+
+[tool.uv]
+
+[tool.poe.tasks]
+lint      = { cmd = "ruff check ." }
+
+format    = [
+  { cmd = "ruff check --select I --fix ." },
+  { cmd = "ruff format ." }
+]
+
+typecheck = { cmd = "pyright" }
+check     = ["format", "lint", "typecheck"]
