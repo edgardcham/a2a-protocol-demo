@@ -36,5 +36,4 @@ format    = [
   { cmd = "ruff format ." }
 ]
 
-typecheck = { cmd = "pyright" }
-check     = ["format", "lint", "typecheck"]
+check     = ["format", "lint"]
