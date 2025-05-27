@@ -102,6 +102,31 @@ cd app && uv run python -m agents.host_agent
 uv run streamlit run app/travel_ui.py
 ```
 
+## 🔧 MCP Integration (New!)
+
+This demo now includes **Model Context Protocol (MCP)** integration! The agents use real tools instead of LLM hallucinations:
+
+- **Flight Agent**: Uses `get_flights` MCP tool for realistic flight data
+- **Stay Agent**: Uses `get_stays` MCP tool for realistic accommodation data
+- **MCP Server**: Provides mock APIs that simulate real travel booking services (`app/mcp/server.py`)
+
+### How It Works
+
+1. **MCP Server**: Built with FastMCP, provides two tools:
+   - `get_flights(origin, destination, start_date, end_date, budget)` - Returns realistic flight options
+   - `get_stays(destination, check_in, check_out, budget)` - Returns realistic accommodation options
+
+2. **Agent Integration**: Each agent uses `MCPToolset` with `StdioServerParameters` to connect to the MCP server
+3. **Automatic Startup**: The MCP server runs automatically when agents start up via subprocess
+4. **Consistent Data**: Provides structured, consistent data instead of unpredictable LLM responses
+
+### Benefits
+
+- ✅ **Consistent Results**: Same inputs always produce similar structured outputs
+- ✅ **Realistic Data**: Mock data that resembles real travel booking APIs
+- ✅ **Demonstrable**: Perfect for showing how MCP can replace API calls in demos
+- ✅ **Extensible**: Easy to add more tools (weather, currency, activities, etc.)
+
 ## 🎯 Using the Application
 
 1. **Open** `http://localhost:8501` in your browser
@@ -128,9 +153,12 @@ a2a-protocol-demo/
 │   │   │   ├── task_manager.py  # Coordinates other agents
 │   │   │   ├── __main__.py      # Service startup script
 │   │   │   └── .well-known/     # Agent discovery metadata
-│   │   ├── flight_agent/        # Flight specialist (Port 8001)
-│   │   ├── stay_agent/          # Accommodation specialist (Port 8002)
+│   │   ├── flight_agent/        # Flight specialist (Port 8001) + MCP tools
+│   │   ├── stay_agent/          # Accommodation specialist (Port 8002) + MCP tools
 │   │   └── activities_agent/    # Activities specialist (Port 8003)
+│   ├── mcp/                     # Model Context Protocol server
+│   │   ├── server.py           # FastMCP server with travel tools
+│   │   └── __main__.py         # MCP server startup script
 │   ├── common/                  # Shared utilities
 │   │   ├── a2a_server.py       # FastAPI server template
 │   │   └── a2a_client.py       # HTTP client for agent communication
