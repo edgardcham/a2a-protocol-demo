@@ -5,9 +5,9 @@
 This is a **demonstration of the Agent-to-Agent (A2A) Protocol** using Google's ADK (Agent Development Kit). It's an AI-powered travel planning application that shows how multiple AI agents can work together to solve complex problems.
 
 Think of it like having a team of travel experts, where each expert specializes in one area:
-- 🛫 **Flight Agent**: Finds the best flight options
-- 🏨 **Stay Agent**: Recommends accommodations
-- 🎯 **Activities Agent**: Suggests things to do
+- 🛫 **Flight Agent**: Finds the best flight options with prices and durations
+- 🏨 **Stay Agent**: Recommends accommodations with detailed pricing
+- 🎯 **Activities Agent**: Suggests tourist attractions and cultural activities
 - 🎭 **Host Agent**: Coordinates everything and presents the final plan
 
 ## 🏗️ How It Works (Architecture)
@@ -45,96 +45,66 @@ Combined Results → User
 - **Communication**: HTTP REST APIs between agents
 - **Session Management**: In-memory session storage
 - **Data Validation**: Pydantic schemas
+- **Package Management**: UV for fast Python package management
 
-## 🛠️ Prerequisites (What You Need)
+## 🛠️ Prerequisites
 
-Before you start, make sure you have:
+- **Python 3.12.10+** (managed by UV)
+- **UV Package Manager** - [Install UV](https://docs.astral.sh/uv/getting-started/installation/)
+- **OpenAI API Key** - [Get one here](https://platform.openai.com/api-keys)
 
-1. **Python 3.12.10 or higher** - [Download here](https://python.org)
-2. **OpenAI API Key** - [Get one here](https://platform.openai.com/api-keys)
-3. **Git** - [Download here](https://git-scm.com/)
-4. **Terminal/Command Line** - Built into Mac/Linux, or use PowerShell on Windows
+## 🚀 Quick Start
 
-## 🚀 Installation & Setup
-
-### Step 1: Clone the Repository
+### 1. Clone and Setup
 ```bash
-# Download the project to your computer
 git clone https://github.com/edgardcham/a2a-protocol-demo.git
 cd a2a-protocol-demo
 ```
 
-### Step 2: Set Up Python Environment
+### 2. Configure Environment
+Create a `.env` file in the `app/` directory:
 ```bash
-# Create a virtual environment (like a sandbox for this project)
-python -m venv .venv
-
-# Activate the virtual environment
-# On Mac/Linux:
-source .venv/bin/activate
-# On Windows:
-.venv\Scripts\activate
+# app/.env
+OPENAI_API_KEY=your_api_key_here
 ```
 
-### Step 3: Install Dependencies
+### 3. Install Dependencies
 ```bash
-# Install all required packages
-pip install -e .
+uv sync
 ```
 
-### Step 4: Configure Environment Variables
-```bash
-# Create a file to store your API keys
-touch .env
+## 🎮 Running the Application
 
-# Add your OpenAI API key to the .env file
-echo "OPENAI_API_KEY=your_api_key_here" >> .env
+Start **5 services** in separate terminal windows:
+
+### Terminal 1: Flight Agent (Port 8001)
+```bash
+cd app && uv run python -m agents.flight_agent
 ```
 
-**Important**: Replace `your_api_key_here` with your actual OpenAI API key!
-
-## 🎮 How to Run the Application
-
-You need to start **4 different services** in **4 separate terminal windows**. Think of each as a different worker in your travel agency.
-
-### Terminal 1: Flight Agent
+### Terminal 2: Stay Agent (Port 8002)
 ```bash
-cd app/agents/flight_agent
-python -m app.agents.flight_agent
+cd app && uv run python -m agents.stay_agent
 ```
-This starts the flight booking specialist on port 8001.
 
-### Terminal 2: Stay Agent
+### Terminal 3: Activities Agent (Port 8003)
 ```bash
-cd app/agents/stay_agent
-python -m app.agents.stay_agent
+cd app && uv run python -m agents.activities_agent
 ```
-This starts the accommodation specialist on port 8002.
 
-### Terminal 3: Activities Agent
+### Terminal 4: Host Agent (Port 8000)
 ```bash
-cd app/agents/activities_agent
-python -m app.agents.activities_agent
+cd app && uv run python -m agents.host_agent
 ```
-This starts the activities specialist on port 8003.
 
-### Terminal 4: Host Agent (Main Coordinator)
+### Terminal 5: Streamlit UI (Port 8501)
 ```bash
-cd app/agents/host_agent
-python -m app.agents.host_agent
+uv run streamlit run app/travel_ui.py
 ```
-This starts the main coordinator on port 8000.
 
-### Terminal 5: Web Interface
-```bash
-# In the project root directory
-streamlit run app/travel_ui.py
-```
-This opens the web interface in your browser (usually at http://localhost:8501).
+## 🎯 Using the Application
 
-## 🎯 How to Use the Application
-
-1. **Open your browser** and go to `http://localhost:8501`
+1. **Open** `http://localhost:8501` in your browser
 2. **Fill in the travel form**:
    - **Origin**: Where you're flying from (e.g., "New York")
    - **Destination**: Where you want to go (e.g., "Paris")
@@ -142,44 +112,58 @@ This opens the web interface in your browser (usually at http://localhost:8501).
    - **End Date**: When your trip ends
    - **Budget**: How much you want to spend (in USD)
 3. **Click "Plan My Trip ✨"**
-4. **Wait for the magic** - The AI agents will work together to create your plan
-5. **Review your results**:
+4. **Review your results**:
    - ✈️ Flight options with prices and durations
-   - 🏨 Accommodation recommendations
-   - 🗺️ Activity suggestions
+   - 🏨 Accommodation recommendations with pricing
+   - 🗺️ Activity suggestions with costs and time requirements
 
-## 📁 Project Structure Explained
+## 📁 Project Structure
 
 ```
 a2a-protocol-demo/
 ├── app/                          # Main application code
 │   ├── agents/                   # AI agent implementations
-│   │   ├── host_agent/          # Main orchestrator
-│   │   │   ├── agent.py         # Agent logic and configuration
+│   │   ├── host_agent/          # Main orchestrator (Port 8000)
+│   │   │   ├── agent.py         # ADK agent configuration
 │   │   │   ├── task_manager.py  # Coordinates other agents
 │   │   │   ├── __main__.py      # Service startup script
 │   │   │   └── .well-known/     # Agent discovery metadata
-│   │   ├── flight_agent/        # Flight booking specialist
-│   │   ├── stay_agent/          # Accommodation specialist
-│   │   └── activities_agent/    # Activities specialist
+│   │   ├── flight_agent/        # Flight specialist (Port 8001)
+│   │   ├── stay_agent/          # Accommodation specialist (Port 8002)
+│   │   └── activities_agent/    # Activities specialist (Port 8003)
 │   ├── common/                  # Shared utilities
 │   │   ├── a2a_server.py       # FastAPI server template
 │   │   └── a2a_client.py       # HTTP client for agent communication
 │   ├── shared/                  # Shared data models
 │   │   └── schemas.py          # Pydantic data validation schemas
-│   └── travel_ui.py            # Streamlit web interface
-├── .github/workflows/           # Automated testing and linting
-├── pyproject.toml              # Project configuration and dependencies
+│   ├── travel_ui.py            # Streamlit web interface
+│   └── .env                    # Environment variables (create this)
+├── .github/workflows/           # CI/CD automation
+├── pyproject.toml              # Project configuration
 ├── uv.lock                     # Locked dependency versions
-├── main.py                     # Simple entry point
-└── README.md                   # This file!
+└── README.md                   # This file
 ```
 
-## 🔧 Development Tools
+## 📦 Dependencies
 
-This project includes several development tools to maintain code quality:
+### Core Dependencies
+- **fastapi** (>=0.115.12) - Modern web framework for building APIs
+- **streamlit** (>=1.45.1) - Web app framework for the UI
+- **google-adk** (>=1.0.0) - Agent Development Kit for AI agents
+- **litellm** (>=1.71.1) - Universal interface for AI models
+- **openai** (>=1.82.0) - OpenAI API client
+- **pydantic** (>=2.11.5) - Data validation and serialization
+- **httpx** (>=0.28.1) - Modern HTTP client for agent communication
+- **python-dotenv** (>=1.1.0) - Environment variable management
+- **uvicorn** (>=0.34.2) - ASGI server for FastAPI
 
-### Code Formatting and Linting
+### Development Dependencies
+- **poethepoet** (>=0.34.0) - Task runner
+- **pyright** (>=1.1.401) - Type checking
+- **ruff** (>=0.11.11) - Fast Python linter and formatter
+
+## 🔧 Development Commands
+
 ```bash
 # Format code automatically
 uv run poe format
@@ -194,77 +178,87 @@ uv run poe typecheck
 uv run poe check
 ```
 
-### Dependencies Used
+## 🧪 Testing the API
 
-- **FastAPI**: Modern web framework for building APIs
-- **Streamlit**: Easy web app framework for data science
-- **Google ADK**: Agent Development Kit for building AI agents
-- **LiteLLM**: Universal interface for different AI models
-- **OpenAI**: Access to GPT models
-- **Pydantic**: Data validation and serialization
-- **HTTPX**: Modern HTTP client for Python
-- **python-dotenv**: Environment variable management
+Test individual agents directly:
+
+```bash
+# Test Flight Agent
+curl -X POST http://localhost:8001/run \
+  -H "Content-Type: application/json" \
+  -d '{"destination": "Paris", "start_date": "2024-06-01", "end_date": "2024-06-07", "budget": 2000}'
+
+# Test Stay Agent
+curl -X POST http://localhost:8002/run \
+  -H "Content-Type: application/json" \
+  -d '{"destination": "Paris", "start_date": "2024-06-01", "end_date": "2024-06-07", "budget": 2000}'
+
+# Test Activities Agent
+curl -X POST http://localhost:8003/run \
+  -H "Content-Type: application/json" \
+  -d '{"destination": "Paris", "start_date": "2024-06-01", "end_date": "2024-06-07", "budget": 2000}'
+
+# Test Full System (Host Agent)
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{"destination": "Paris", "start_date": "2024-06-01", "end_date": "2024-06-07", "budget": 2000}'
+```
 
 ## 🐛 Troubleshooting
 
-### Common Issues and Solutions
+### Common Issues
 
-**Problem**: "ModuleNotFoundError" when running agents
-**Solution**: Make sure you're in the correct directory and have activated your virtual environment
+**Services not starting?**
+- Ensure you're in the correct directory (`app/` for agents)
+- Check that ports 8000-8003 and 8501 are available
+- Verify your OpenAI API key is set in `app/.env`
 
-**Problem**: "Connection refused" errors
-**Solution**: Make sure all 4 agent services are running in separate terminals
+**"No stays returned" or missing data?**
+- Ensure all 4 agent services are running
+- Check terminal logs for error messages
+- Verify agents are accessible: `curl http://localhost:800X/docs`
 
-**Problem**: "Invalid API key" errors
-**Solution**: Check that your `.env` file contains the correct OpenAI API key
+**Duration showing "N/A"?**
+- Restart all agent services to apply schema updates
+- Agents now return standardized `duration_hours` field
 
-**Problem**: Agents return "No results"
-**Solution**: Check that all agents are running and accessible on their respective ports
-
-**Problem**: Streamlit won't start
-**Solution**: Make sure you're running the command from the project root directory
-
-### Checking if Services are Running
+### Checking Service Status
 ```bash
-# Check if services are responding
-curl http://localhost:8001/docs  # Flight agent
-curl http://localhost:8002/docs  # Stay agent
-curl http://localhost:8003/docs  # Activities agent
-curl http://localhost:8000/docs  # Host agent
+# Check if all services are running
+curl -s http://localhost:8001/docs > /dev/null && echo "Flight agent: ✅" || echo "Flight agent: ❌"
+curl -s http://localhost:8002/docs > /dev/null && echo "Stay agent: ✅" || echo "Stay agent: ❌"
+curl -s http://localhost:8003/docs > /dev/null && echo "Activities agent: ✅" || echo "Activities agent: ❌"
+curl -s http://localhost:8000/docs > /dev/null && echo "Host agent: ✅" || echo "Host agent: ❌"
 ```
 
 ## 🎓 Learning Opportunities
 
-This project demonstrates several important concepts:
+This project demonstrates:
 
-1. **Microservices Architecture**: Each agent runs as an independent service
-2. **AI Agent Orchestration**: How multiple AI agents can work together
-3. **RESTful APIs**: Communication between services using HTTP
-4. **Modern Python Development**: Using tools like FastAPI, Pydantic, and Streamlit
-5. **Environment Management**: Proper handling of API keys and configuration
-6. **Code Quality**: Automated formatting, linting, and type checking
+1. **Microservices Architecture** - Each agent runs as an independent service
+2. **AI Agent Orchestration** - How multiple AI agents collaborate
+3. **RESTful APIs** - Service-to-service communication
+4. **Modern Python Development** - FastAPI, Pydantic, Streamlit, UV
+5. **Prompt Engineering** - Structured JSON responses from LLMs
+6. **Session Management** - Handling stateful AI conversations
 
-## 🚀 Next Steps
+## 🚀 Extending the Project
 
-Want to extend this project? Here are some ideas:
+Ideas for enhancement:
 
-1. **Add More Agents**: Create agents for restaurants, weather, or transportation
-2. **Improve UI**: Add maps, images, or more interactive elements
-3. **Add Persistence**: Store travel plans in a database
-4. **Add Authentication**: User accounts and saved preferences
-5. **Deploy to Cloud**: Make it accessible to others online
-6. **Add Real APIs**: Connect to actual flight and hotel booking services
+1. **Add More Agents** - Weather, restaurants, transportation, currency exchange
+2. **Improve UI** - Add maps, images, booking links, itinerary export
+3. **Add Persistence** - Database storage for travel plans and user preferences
+4. **Real API Integration** - Connect to actual booking services
+5. **Authentication** - User accounts and saved trips
+6. **Deployment** - Docker containers and cloud deployment
 
 ## 📝 License
 
-This project is for educational and demonstration purposes. Please check individual dependencies for their licensing terms.
-
-## 🤝 Contributing
-
-This is a demo project, but feel free to fork it and make it your own! If you find bugs or have suggestions, please open an issue.
+This project is for educational and demonstration purposes. Check individual dependencies for their licensing terms.
 
 ---
 
 **Happy Travels! ✈️🌍**
 
-*Built with ❤️ using Google ADK and the A2A Protocol*
+*Built with ❤️ using Google ADK, OpenAI, and the A2A Protocol*
